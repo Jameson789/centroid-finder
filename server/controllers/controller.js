@@ -54,10 +54,8 @@ const getThumbnail = async (req, res) => {
 // Start video processing using child_process
 const startVideoProcess = async (req, res) => {
   const { filename } = req.params;
-  const { targetColor, threshold, timeIncrement } = req.query;
+  const { targetColor, threshold } = req.query;
   const areas = req.body || null;
-
-  console.log("Time increment: ", timeIncrement);
 
   // Debug: see what came in
   console.log("Incoming areas payload:", JSON.stringify(areas, null, 2));
