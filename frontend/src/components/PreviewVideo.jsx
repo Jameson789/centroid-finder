@@ -16,7 +16,6 @@ export default function PreviewVideo({ params }) {
   // States for color, threshold
   const [color, setColor] = useState("#000000");
   const [threshold, setThreshold] = useState(100);
-  const [timeIncrement, setTimeIncrement] = useState(1);
 
   // States for areas
   const [areas, setAreas] = useState([]); // collected area data
@@ -266,25 +265,6 @@ export default function PreviewVideo({ params }) {
             onChange={(e, newValue) => setThreshold(newValue)}
             sx={{ width: 250 }}
           />
-
-          {/* Increment slider */}
-          <Box sx={{display: 'flex', gap: '1.5em'}}>
-            <Tooltip title="Data is recorded every X seconds" arrow>
-              <Typography sx={{ marginLeft: 2 }}>Time Increment:</Typography>
-            </Tooltip>
-            <Slider
-              value={timeIncrement}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value, index) => (
-                <span>{value} second(s)</span>
-              )}
-              step={1}
-              min={1}
-              max={60}
-              onChange={(e, newValue) => setTimeIncrement(newValue)}
-              sx={{ width: 250 }}
-            />
-          </Box>
 
           {/* Area Selector */}
           <Typography sx={{ marginLeft: 2 }}>Set Regions:</Typography>
