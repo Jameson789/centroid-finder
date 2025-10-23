@@ -8,7 +8,6 @@ const StartProcess = ({
   filename,
   color,
   threshold,
-  timeIncrement,
   areaValues,
   areaNames,
   status,
@@ -16,8 +15,7 @@ const StartProcess = ({
   start,
   reset,
   done,
-  checkErrors,
-  
+  checkErrors
 }) => {
   const [completedJobs, setCompletedJobs] = useState([]);
   const [jobError, setJobError] = useState("");
@@ -137,7 +135,7 @@ const StartProcess = ({
           setJobError("");
           const hasError = checkErrors();
           if (!hasError){
-            start(filename, color, threshold, timeIncrement, areas);
+            start(filename, color, threshold, areas);
           }
           
         }}
