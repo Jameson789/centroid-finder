@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: .
+      target: backend-builder
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${VIDEOS_PATH}:/videos
+      - ${RESULTS_PATH}:/results
+
+  frontend:
+    build:
+      context: .
+      target: frontend-builder
+    ports:
+      - "3001:3001"
