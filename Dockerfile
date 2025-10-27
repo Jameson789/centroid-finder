@@ -1,6 +1,5 @@
 # First Stage: Build Jar with Maven
-# TO DO: Maven image to be changed
-FROM maven:3.8.5-openjdk-17 AS java-builder
+FROM maven:4.0.0-rc-4-eclipse-temurin-21 AS java-builder
 WORKDIR /app
 COPY Processor/pom.xml .
 COPY Processor/src ./src
