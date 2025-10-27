@@ -1,0 +1,27 @@
+# for express back end
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+Dockerfile
+docker-compose.yml
+README.md
+LICENSE
+coverage/
+dist/
+tmp/
+*.log
+*.swp
+
+# next js front end
+.next/
+yarn-debug.log*
+yarn-error.log*
+.env*.local
+.DS_Store
+
+# java jar
+
+Processor/src/test/
+
