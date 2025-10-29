@@ -45,12 +45,15 @@ jobs:
             type=raw,value=latest
       - name: Create docker-compose.override.yml
         run: |
+          BACKEND_TAG=$(echo "${{ steps.meta-backend.outputs.tags }}" | head -n 1)
+          FRONTEND_TAG=$(echo "${{ steps.meta-frontend.outputs.tags }}" | head -n 1)
+
           cat <<'EOF' > docker-compose.override.yml
           services:
             backend:
-              image: ${{ steps.meta-backend.outputs.tags }}
+              image: "$BACKEND_TAG"
             frontend:
-              image: ${{ steps.meta-frontend.outputs.tags }}
+              image: "$FRONTEND_TAG"
           EOF
 
       - name: Build images
