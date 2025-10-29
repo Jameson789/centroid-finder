@@ -54,10 +54,10 @@ jobs:
           services:
             backend:
               image: $BACKEND_TAG
-              volumes: []
+              volumes: null
             frontend:
               image: $FRONTEND_TAG
-              volumes: []
+              volumes: null
           EOF
 
       - name: Build images
