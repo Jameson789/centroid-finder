@@ -2,10 +2,10 @@ name: Publish images
 # Trigger section
 on:
   push: # on push to repository
-    # if: github.repository == 'Jameson789/centroid-finder'
-    # branches: [ actions ] # only if push is to deploy
-    # paths: # only if changes are within this path
-    #   - '.'
+    if: github.repository == 'Jameson789/centroid-finder'
+    branches: [ deploy ] # only if push is to deploy
+    paths: # only if changes are within this path
+      - '.'
   workflow_dispatch: # allows manual triggers from github UI
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
             type=raw,value=latest
       - name: Create docker-compose.override.yml
         run: |
-          cat <<EOF > docker-compose.override.yml
+          cat <<'EOF' > docker-compose.override.yml
           services:
             backend:
               image: ${{ steps.meta-backend.outputs.tags }}
