@@ -3,7 +3,7 @@ name: Publish images
 on:
   push: # on push to repository
     if: github.repository == 'Jameson789/centroid-finder'
-    branches: [ deploy ] # only if push is to deploy
+    branches: [ action ] # only if push is to deploy
     paths: # only if changes are within this path
       - '.'
   workflow_dispatch: # allows manual triggers from github UI
