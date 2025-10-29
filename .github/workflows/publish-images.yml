@@ -30,7 +30,7 @@ jobs:
         id: repo_lower
         with:
           result-encoding: string
-          script: return `ghcr.io/${github.repository_owner.toLowerCase()}`
+          script: return 'ghcr.io/${{github.repository_owner}}'.toLowerCase()
       - name: generates metadata for backend docker image
         uses: docker/metadata-action@v5
         id: meta-backend
