@@ -14,9 +14,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      VIDEOS_PATH: /tmp/videos
-      RESULTS_PATH: /tmp/results
     steps: 
       - name: checkout repository
         uses: actions/checkout@v4
@@ -46,23 +43,35 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=raw,value=latest
-      - name: Create docker-compose.override.yml
-        run: |
-          BACKEND_TAG=$(echo "${{ steps.meta-backend.outputs.tags }}" | head -n 1)
-          FRONTEND_TAG=$(echo "${{ steps.meta-frontend.outputs.tags }}" | head -n 1)
-          echo "using: $BACKEND_TAG"
-          echo "using: $FRONTEND_TAG"
-
-          cat <<EOF > docker-compose.override.yml
-          services:
-            backend:
-              image: $BACKEND_TAG
-            frontend:
-              image: $FRONTEND_TAG
-          EOF
-
-      - name: Build images
-        run: docker compose -f docker-compose.yml -f docker-compose.override.yml build
-
-      - name: Push images
-        run: docker compose -f docker-compose.yml -f docker-compose.override.yml push
+      - name: build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: backend-builder
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-backend:buildcache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-backend:buildcache,mode=max
+      - name: build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: frontend-builder
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-frontend:buildcache
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-frontend:buildcache,mode=max
