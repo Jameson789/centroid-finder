@@ -50,13 +50,13 @@ jobs:
           echo "using: $BACKEND_TAG"
           echo "using: $FRONTEND_TAG"
 
-          cat <<'EOF' > docker-compose.override.yml
+          cat <<EOF > docker-compose.override.yml
           services:
             backend:
-              image: "$BACKEND_TAG"
+              image: $BACKEND_TAG
               volumes: []
             frontend:
-              image: "$FRONTEND_TAG"
+              image: $FRONTEND_TAG
               volumes: []
           EOF
 
