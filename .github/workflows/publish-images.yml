@@ -47,13 +47,17 @@ jobs:
         run: |
           BACKEND_TAG=$(echo "${{ steps.meta-backend.outputs.tags }}" | head -n 1)
           FRONTEND_TAG=$(echo "${{ steps.meta-frontend.outputs.tags }}" | head -n 1)
+          echo "using: $BACKEND_TAG"
+          echo "using: $FRONTEND_TAG"
 
           cat <<'EOF' > docker-compose.override.yml
           services:
             backend:
               image: "$BACKEND_TAG"
+              volumes: []
             frontend:
               image: "$FRONTEND_TAG"
+              volumes: []
           EOF
 
       - name: Build images
