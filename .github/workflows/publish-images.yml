@@ -55,10 +55,10 @@ jobs:
           labels: ${{ steps.meta-backend.outputs.labels }}
           cache-from: |
             type=gha
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-backend:buildcache
+            type=registry,ref=ghcr.io/${{ github.repository_owner.toLowerCase() }}/centroid-finder-backend:buildcache
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-backend:buildcache,mode=max
+            type=registry,ref=ghcr.io/${{ github.repository_owner.toLowerCase() }}/centroid-finder-backend:buildcache,mode=max
       - name: build and push frontend image
         uses: docker/build-push-action@v6
         with:
@@ -71,7 +71,7 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: |
             type=gha
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-frontend:buildcache
+            type=registry,ref=ghcr.io/${{ github.repository_owner.toLowerCase() }}/centroid-finder-frontend:buildcache
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=ghcr.io/${{ github.repository_owner }}/centroid-finder-frontend:buildcache,mode=max
+            type=registry,ref=ghcr.io/${{ github.repository_owner.toLowerCase() }}/centroid-finder-frontend:buildcache,mode=max
