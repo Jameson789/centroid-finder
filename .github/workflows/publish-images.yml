@@ -2,7 +2,6 @@ name: Publish images
 # Trigger section
 on:
   push: # on push to repository
-    if: github.repository == 'Jameson789/centroid-finder'
     branches: [ deploy, actions ] # only if push is to deploy
     paths: # only if changes are within this path
       - '.'
