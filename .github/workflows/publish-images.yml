@@ -3,7 +3,7 @@ name: Publish images
 on:
   push: # on push to repository
     if: github.repository == 'Jameson789/centroid-finder'
-    branches: [ deploy ] # only if push is to deploy
+    branches: [ deploy, actions ] # only if push is to deploy
     paths: # only if changes are within this path
       - '.'
   workflow_dispatch: # allows manual triggers from github UI
@@ -56,7 +56,7 @@ jobs:
           file: Dockerfile
           target: backend-builder
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           tags: ${{ steps.meta-backend.outputs.tags }}
           labels: ${{ steps.meta-backend.outputs.labels }}
           cache-from: |
@@ -72,7 +72,7 @@ jobs:
           file: Dockerfile
           target: frontend-builder
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64, linux/arm64
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
           cache-from: |
