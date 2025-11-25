@@ -1,18 +1,43 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Slider, Container, Box, Typography } from "@mui/material";
+import { Slider, Container, Box, Typography, Checkbox, TextField, IconButton, Alert, Collapse} from "@mui/material";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import StartProcess from "./StartProcess";
+import { AreaSelector } from '@bmunozg/react-image-area';
+import useBinarizedImage from "@/hooks/useBinarizedImage";
+import useAreaValidation from "@/hooks/useAreaValidation";
 
 export default function PreviewVideo({ params }) {
   // Get filename from URL
   const { filename } = useParams();
-  // States for color and threshold
+
+  // States for color, threshold
   const [color, setColor] = useState("#000000");
   const [threshold, setThreshold] = useState(100);
+
+  // States for areas
+  const [areas, setAreas] = useState([]); // collected area data
+  const [areaData, setAreaData] = useState([]); // computed area data
+  const [areaToggle, setAreaToggle] = useState(false); // toggle for optional area selections
+  const [areaNames, setAreaNames] = useState(['1', '2']); // area names
+
+  // States for alerts
+  const [infoAlert, setInfoAlert] = useState(false);
+
+  // errors
+  const {
+    error,
+    errorMessages,
+    checkErrors,
+    clearErrors
+  } = useAreaValidation(areaNames, areas, areaToggle);
+
   // Refs for canvas and image
-  const canvasRef = useRef(null);
   const imgRef = useRef(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const canvasRef = useBinarizedImage(imgRef, imgLoaded, color, threshold);
 
   // Thumbnail URL
   const thumbnailUrl = `http://localhost:3000/thumbnail/${encodeURIComponent(
@@ -27,53 +52,84 @@ export default function PreviewVideo({ params }) {
 
     img.onload = () => {
       imgRef.current = img;
-      drawBinarized(img, color, threshold);
+      setImgLoaded(true);
     };
   }, [thumbnailUrl]);
 
-  // Update binarized image when color/threshold changes
+  // Calculate area data
   useEffect(() => {
-    if (imgRef.current) {
-      drawBinarized(imgRef.current, color, threshold);
+    if (imgRef.current){
+      const img = imgRef.current
+      const height = img.height;
+      const width = img.width;
+      const newAreaData = [];
+      areas.forEach(area => {
+        const newArea = {};
+        newArea.x = Math.round(area.x * width / 100);
+        newArea.y = Math.round(area.y * height / 100);
+        newArea.width = Math.round(area.width * width / 100);
+        newArea.height = Math.round(area.height * height / 100);
+        newAreaData.push(newArea)
+      });
+      
+      setAreaData(newAreaData);
     }
-  }, [color, threshold]);
+    
+  }, [areas])
 
-  // convert the image to binary based on color and threshold
-  const drawBinarized = (img, targetColor, threshold) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+  // ---- Handlers ----
 
-    // Scale image
-    const scale = 300 / img.width;
-    const width = img.width * scale;
-    const height = img.height * scale;
+  // handle change of area names
+  const handleNameChange = (index, newVal) => {
+    setAreaNames(prev => {
+      const newNames = [...prev];
+      newNames[index] = newVal;
+      return newNames;
+    })
+  }
 
-    canvas.width = width;
-    canvas.height = height;
-
-    // Draw and process the image
-    ctx.drawImage(img, 0, 0, width, height);
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-
-    // target color values
-    const rT = parseInt(targetColor.slice(1, 3), 16);
-    const gT = parseInt(targetColor.slice(3, 5), 16);
-    const bT = parseInt(targetColor.slice(5, 7), 16);
-
-    // Process each individual pixel
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-
-      const diff = Math.sqrt((r - rT) ** 2 + (g - gT) ** 2 + (b - bT) ** 2);
-      const value = diff < threshold ? 0 : 255;
-      data[i] = data[i + 1] = data[i + 2] = value;
+  // Add area selection
+  const addArea = () => {
+    let num = areaNames.length;
+    if (num >= 10){
+      // don't do anything if 10 or more areas
+    } else {
+      num++;
+      setAreaNames(prev => [...prev, `${num}`]);
+      clearErrors();
     }
+  }
 
-    ctx.putImageData(imageData, 0, 0);
+  // Delete area selection
+  const deleteArea = () => {
+    if (areaNames.length <= 1){
+      // don't do anything if 1 or less areas
+    } else {
+      if (areaNames.length == areas.length){
+        setAreas(prev => prev.slice(0, -1));
+      }
+      setAreaNames(prev => prev.slice(0, -1));
+      clearErrors();
+    }
+  }
+
+  // render area name in area selector
+  const renderAreaNames = (areaProps) => {
+    if (!areaProps.isChanging) {
+        return (
+            <div key={areaProps.areaNumber}>
+                <Typography
+                sx={{
+                  textShadow: '1px 1px white, -1px -1px white, -1px 1px white, 1px -1px white',
+                  opacity: '65%'
+                }}
+                >{areaNames[areaProps.areaNumber - 1]}</Typography>
+            </div>
+        );
+    }
   };
+
+  // ---- Styles ----
 
   // Card style
   const cardStyle = {
@@ -86,6 +142,21 @@ export default function PreviewVideo({ params }) {
     flex: "1 1 320px",
   };
 
+  // Original Image thumbnail
+  const OgImage = () => {
+    return(
+    <img
+      src={thumbnailUrl}
+      alt="Original thumbnail"
+      style={{
+        width: "300px",
+        borderRadius: 8,
+        border: "1px solid #ccc",
+      }}
+    /> )
+  }
+
+  // ---- Rendering ----
   return (
     <Container maxWidth="md" sx={{ py: 5, px: 3, bgcolor: "#f9f9f9", borderRadius: 2, boxShadow: 2, marginTop: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5, marginBottom: 2 }}>
@@ -102,15 +173,18 @@ export default function PreviewVideo({ params }) {
             <Typography variant="h6" gutterBottom>
               Original
             </Typography>
-            <img
-              src={thumbnailUrl}
-              alt="Original thumbnail"
-              style={{
-                width: "300px",
-                borderRadius: 8,
-                border: "1px solid #ccc",
-              }}
-            />
+            {areaToggle &&
+              <AreaSelector
+                areas={areas}
+                onChange={(areas) => setAreas(areas)}
+                customAreaRenderer={renderAreaNames}
+                maxAreas={areaNames.length}
+                unit="percentage"
+              >
+                <OgImage />
+              </AreaSelector>
+            }
+            {!areaToggle && <OgImage />}
           </Box>
 
           {/* Binarized image */}
@@ -128,6 +202,30 @@ export default function PreviewVideo({ params }) {
             />
           </Box>
         </Box>
+
+        {/* Alerts */}
+        <Collapse in={infoAlert}>
+        <Alert 
+          onClose={() => {setInfoAlert(false)}} 
+          severity="info"
+        >
+          Click original thumbnail to make region selection(s)
+        </Alert>
+        </Collapse>
+
+        {
+          error && 
+          <>
+            {errorMessages.map((value, index) => (
+              <Alert
+              key={index}
+              severity="error"
+              >
+                {value}
+              </Alert>
+            ))}
+          </> 
+        }
 
         {/* Controls */}
         <Box
@@ -167,11 +265,66 @@ export default function PreviewVideo({ params }) {
             onChange={(e, newValue) => setThreshold(newValue)}
             sx={{ width: 250 }}
           />
+
+          {/* Area Selector */}
+          <Typography sx={{ marginLeft: 2 }}>Set Regions:</Typography>
+          <Checkbox
+            onChange={(e) => {
+              setAreaToggle(prev => !prev);
+              setInfoAlert(!areaToggle);
+              clearErrors();
+            }}
+          />
+          {/* Area Names inputs */}
+          {areaToggle && 
+            <div>
+              {areaNames.map((value, index) => (
+                <TextField
+                  key={index} 
+                  value={value}
+                  label={'Region ' + (index + 1) }
+                  onChange={(e) => handleNameChange(index, e.target.value)}
+                  size="small"
+                  sx={{ marginLeft: 2, marginBottom: 2 }}
+                />
+              ))}
+              {/* Delete last area button */}
+              <IconButton
+                onClick={() => {
+                  deleteArea();
+                }}
+                disabled={areaNames.length <= 1}
+              >
+                <RemoveCircleOutlineIcon />
+              </IconButton>
+              
+              {/* Add area button */}
+              <IconButton
+                onClick={() => {
+                  addArea();
+                }}
+                disabled={areaNames.length >= 10}
+              >
+                <AddCircleOutlineIcon />
+              </IconButton>
+              
+            </div>
+          }
+
+
         </Box>
       </Box>
 
       {/* Process button */}
-      <StartProcess filename={filename} color={color} threshold={threshold} />
+      <StartProcess
+        filename={filename}
+        color={color}
+        threshold={threshold}
+        areaValues={areaToggle ? areaData : []}
+        areaNames={areaToggle ? areaNames : []}
+        checkErrors={checkErrors}
+      />
+      
     </Container>
   );
 }
