@@ -2,7 +2,7 @@ name: Publish images
 # Trigger section
 on:
   push: # on push to repository
-    branches: [ deploy, actions ] # only if push is to deploy
+    branches: [ main ] # only if push is to main
     paths: # only if changes are within this path
       - '.'
   workflow_dispatch: # allows manual triggers from github UI
@@ -40,6 +40,7 @@ jobs:
             type=semver,pattern={{version}}
             type=raw,value=latest
       - name: build and push backend image
+        timeout-minutes: 10
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -88,6 +89,7 @@ jobs:
             type=semver,pattern={{version}}
             type=raw,value=latest
       - name: build and push frontend image
+        timeout-minutes: 10
         uses: docker/build-push-action@v6
         with:
           context: .
