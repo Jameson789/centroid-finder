@@ -35,4 +35,7 @@ node_modules
 server/frame_centroids.csv
 *.csv
 
+.next/
+
+
 *.env

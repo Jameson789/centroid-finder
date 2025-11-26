@@ -55,6 +55,10 @@ const getThumbnail = async (req, res) => {
 const startVideoProcess = async (req, res) => {
   const { filename } = req.params;
   const { targetColor, threshold } = req.query;
+  const areas = req.body || null;
+
+  // Debug: see what came in
+  console.log("Incoming areas payload:", JSON.stringify(areas, null, 2));
 
   // Check if params are missing
   if (!targetColor || !threshold) {
@@ -88,46 +92,78 @@ const startVideoProcess = async (req, res) => {
     const jobId = randomUUID();
     jobStatus[jobId] = { status: "processing" };
 
+    // --- create areas file if provided, then log existence/size/preview ---
+    const tmpDir = process.env.AREAS_TMP_DIR || "/tmp";
+    let areasFilePath = null;
+
+    if (areas) {
+      areasFilePath = path.join(tmpDir, `areas-${jobId}.json`);
+      await fs.writeFile(areasFilePath, JSON.stringify(areas), "utf8");
+
+      // Validate it's there and readable
+      const stat = await fs.stat(areasFilePath);
+      const preview = (await fs.readFile(areasFilePath, "utf8")).slice(0, 200);
+      console.log(
+        `[AREAS FILE ${jobId}] path=${areasFilePath} size=${stat.size}B preview=${preview}...`
+      );
+    }
+
+    const args = [
+      "-Xss16m",
+      "-jar",
+      "/app/Processor/target/centroidFinderVideo-jar-with-dependencies.jar",
+      path.join("/videos", filename),
+      targetColor,
+      thresholdNum.toString(),
+      jobId,
+    ];
+
+    if (areasFilePath) {
+      args.push("--areas-file", areasFilePath);
+    }
+
+    // Log exact java command/args for verification
+    console.log(`[SPAWN ${jobId}] java ${args.map(a => JSON.stringify(a)).join(" ")}`);
+
     const child = spawn(
-  "java",
-  [
-    "-Xss16m",
-    "-jar",
-    "/app/Processor/target/centroidFinderVideo-jar-with-dependencies.jar",
-    path.join("/videos", filename),
-    targetColor,
-    thresholdNum.toString(),
-    jobId,
-  ],
-  {
-    stdio: ["ignore", "pipe", "pipe"],
-  }
-);
+      "java",
+      args,
+      {
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
 
-let output = "";
+    let output = "";
 
-child.stdout.on("data", (data) => {
-  const text = data.toString();
-  output += text;
-  console.log(`[JAR OUTPUT ${jobId}]: ${text.trim()}`);
-});
+    child.stdout.on("data", (data) => {
+      const text = data.toString();
+      output += text;
+      console.log(`[JAR OUTPUT ${jobId}]: ${text.trim()}`);
+    });
 
-child.stderr.on("data", (data) => {
-  const text = data.toString();
-  console.error(`[JAR ERROR ${jobId}]: ${text.trim()}`);
-});
+    child.stderr.on("data", (data) => {
+      const text = data.toString();
+      console.error(`[JAR ERROR ${jobId}]: ${text.trim()}`);
+    });
 
-child.on("exit", (code) => {
-  jobStatus[jobId] = { status: code === 0 ? "done" : "error" };
-});
+    child.on("exit", async (code) => {
+      jobStatus[jobId] = { status: code === 0 ? "done" : "error" };
+      // Clean up the temp file
+      if (areasFilePath) {
+        try {
+          await fs.unlink(areasFilePath);
+        } catch (e) {
+          console.warn(`Could not delete temp areas file for ${jobId}:`, e.message);
+        }
+      }
+    });
 
-child.on("error", (err) => {
-  jobStatus[jobId] = {
-    status: "error",
-    error: `Error processing video: ${err.message}`,
-  };
-});
-
+    child.on("error", (err) => {
+      jobStatus[jobId] = {
+        status: "error",
+        error: `Error processing video: ${err.message}`,
+      };
+    });
 
     res.status(202).json({ jobId });
   } catch (err) {
@@ -232,7 +268,6 @@ const clearAllCompletedJobs = async (req, res) => {
     res.status(500).json({ error: "Failed to clear completed jobs" });
   }
 };
-
 
 export default {
   getVideos,

@@ -6,18 +6,29 @@ const withVideoProcessing = (WrappedComponent) => {
     const [error, setError] = useState("");
     const [jobId, setJobId] = useState(null);
 
-    const start = async (filename, color, threshold) => {
+    const start = async (filename, color, threshold, areas) => {
       setError("");
       setStatus("processing");
 
+      const areasObj = areas ? Object.fromEntries(areas) : null;
+
       try {
-        const res = await fetch(
+
+        // only send req body if areas are selected
+        const res = areas ? await fetch(
+          `http://localhost:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(areasObj)
+          }
+        ) : await fetch(
           `http://localhost:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
           }
-        );
+        )
 
         if (!res.ok) {
           const errData = await res.json();
