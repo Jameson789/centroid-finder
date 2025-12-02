@@ -5,6 +5,8 @@ services:
       target: backend-builder
     ports:
       - "3000:3000"
+    environment:
+      - HOST=${HOST}
     volumes:
       - ${VIDEOS_PATH}:/videos
       - ${RESULTS_PATH}:/results

@@ -3,8 +3,8 @@ import router from './router/router.js';
 import dotenv from 'dotenv';
 import cors from "cors";
 
-dotenv.config({ path: '../.env' });
-
+dotenv.config();
+const HOST = process.env.HOST || "localhost";
 const app = express();
 const PORT = 3000;
 
@@ -23,4 +23,4 @@ app.use((err, _req, res, next) => {
   next(err);
 });
 
-app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Listening on http://${HOST}:${PORT}`));
