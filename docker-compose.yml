@@ -15,5 +15,7 @@ services:
     build:
       context: .
       target: frontend-builder
+    environment:
+      - NEXT_PUBLIC_HOST=${HOST}
     ports:
       - "3001:3001"
