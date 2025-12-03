@@ -23,4 +23,4 @@ app.use((err, _req, res, next) => {
   next(err);
 });
 
-app.listen(PORT, () => console.log(`Listening on http://${HOST}:${PORT}`));
+app.listen(PORT, HOST, () => console.log(`Listening on http://${HOST}:${PORT}`));
