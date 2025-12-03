@@ -39,8 +39,9 @@ export default function PreviewVideo({ params }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const canvasRef = useBinarizedImage(imgRef, imgLoaded, color, threshold);
 
+  const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
   // Thumbnail URL
-  const thumbnailUrl = `http://localhost:3000/thumbnail/${encodeURIComponent(
+  const thumbnailUrl = `http://${HOST}:3000/thumbnail/${encodeURIComponent(
     filename
   )}`;
 

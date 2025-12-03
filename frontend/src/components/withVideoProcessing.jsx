@@ -14,16 +14,17 @@ const withVideoProcessing = (WrappedComponent) => {
 
       try {
 
+        const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
         // only send req body if areas are selected
         const res = areas ? await fetch(
-          `http://localhost:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
+          `http://${HOST}:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(areasObj)
           }
         ) : await fetch(
-          `http://localhost:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
+          `http://${HOST}:3000/process/${filename}?targetColor=${color.slice(1)}&threshold=${threshold}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

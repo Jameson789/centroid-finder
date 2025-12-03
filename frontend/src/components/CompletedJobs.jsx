@@ -3,6 +3,7 @@ import { Box, Typography, List, ListItem, Button, Link } from "@mui/material";
 
 export default function CompletedJobs({ jobs, onDelete, onClearAll }) {
   if (!jobs.length) return null;
+  const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
 
   return (
     <Box sx={{ marginTop: 6 }}>
@@ -30,7 +31,7 @@ export default function CompletedJobs({ jobs, onDelete, onClearAll }) {
 
             <Box sx={{ display: "flex", gap: 1 }}>
               <Link
-                href={`http://localhost:3000/process/${filename.replace(/\.[^/.]+$/, "")}_${jobId}.csv`}
+                href={`http://${HOST}:3000/process/${filename.replace(/\.[^/.]+$/, "")}_${jobId}.csv`}
                 download={`${filename.replace(/\.[^/.]+$/, "")}.csv`}
                 sx={{ textDecoration: "none" }}
               >

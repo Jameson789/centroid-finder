@@ -16,7 +16,8 @@ import {
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 
-const API_HOST = "http://localhost:3000"; // Express server
+const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
+const API_HOST = `http://${HOST}:3000`; // Express server
 
 const TARGET_W = 240;
 const TARGET_H = 135;
