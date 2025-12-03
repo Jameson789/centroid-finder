@@ -27,7 +27,8 @@ const StartProcess = ({
   useEffect(() => {
     const fetchCompleted = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/completed");
+        const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
+        const res = await fetch(`http://${HOST}:3000/api/completed`);
         if (!res.ok) throw new Error("Failed to fetch completed jobs");
         const data = await res.json();
         setCompletedJobs(data);
@@ -45,7 +46,8 @@ const StartProcess = ({
 
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:3000/process/${jobId}/status`);
+        const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
+        const res = await fetch(`http://${HOST}:3000/process/${jobId}/status`);
         const data = await res.json();
 
         if (data.status === "done") {
@@ -75,8 +77,9 @@ const StartProcess = ({
   // Handle download
   const handleDownload = async (jobId, filename) => {
   try {
+    const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
     const baseName = filename.replace(/\.[^/.]+$/, "");
-    const downloadPath = `http://localhost:3000/process/${baseName}_${jobId}.csv`;
+    const downloadPath = `http://${HOST}:3000/process/${baseName}_${jobId}.csv`;
 
     const res = await fetch(downloadPath);
     if (!res.ok) throw new Error("File not found");
@@ -99,7 +102,8 @@ const StartProcess = ({
 
   const handleDeleteJob = async (jobIdToDelete) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/completed/${jobIdToDelete}`, {
+      const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
+      const res = await fetch(`http://${HOST}:3000/api/completed/${jobIdToDelete}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete job");
@@ -116,7 +120,8 @@ const StartProcess = ({
     if (!confirmed) return;
 
     try {
-      const res = await fetch("http://localhost:3000/api/completed", {
+      const HOST = process.env.NEXT_PUBLIC_HOST || "localhost";
+      const res = await fetch(`http://${HOST}:3000/api/completed`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to clear jobs");

@@ -1,0 +1,39 @@
+name : Deployment Pipeline
+
+on:
+ workflow_run:
+  workflows: ["publish-images"]
+  types:
+    - completed
+  branches: [main]
+ workflow_dispatch:
+
+jobs:
+ deploy:
+  runs-on: ubuntu-latest
+
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Deploy to Digital Ocean VM
+      uses: appleboy/ssh-action@1.0.0
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USERNAME }}
+        password: ${{ secrets.VM_PASSWORD }}
+        port: 22
+        script: |
+         echo "Connected, CDing into directory"
+         cd /root/projects/Salamander-Tracker || (mkdir -p /root/projects/Salamander-Tracker && cd /root/projects/Salamander-Tracker)
+
+         if [ ! -d "salamander-results" ]; then
+         echo "Creating salamander-results"
+         mkdir salamander-results
+         fi
+
+         if [ ! -d "salamander-videos" ]; then
+         echo "Creating salamander-videos"
+         mkdir salamander-videos
+         fi
+
+            
