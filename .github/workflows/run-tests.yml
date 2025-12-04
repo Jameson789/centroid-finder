@@ -24,6 +24,6 @@ jobs:
 
       - name: Run Maven Tests
         run: |
-          cd processor
+          cd Processor
           mvn test
 
