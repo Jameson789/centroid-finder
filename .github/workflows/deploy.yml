@@ -36,4 +36,19 @@ jobs:
          mkdir salamander-videos
          fi
 
-            
+         git clone https://github.com/Jameson789/centroid-finder.git
+
+         cd centroid-finder/frontend
+
+         echo "NEXT_PUBLIC_HOST=${{secrets.VM_HOST}}" > .env
+
+         cd ../
+
+         echo "Running and rebuilding project..."
+         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose up -d
+
+         echo "Cleaning up any old docker images..."
+         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose down
+         docker prune
+
+
