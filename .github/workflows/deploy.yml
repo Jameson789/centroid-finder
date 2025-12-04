@@ -44,11 +44,11 @@ jobs:
 
          cd ../
 
-         echo "Running and rebuilding project..."
-         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose up -d
-
          echo "Cleaning up any old docker images..."
          VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose down
-         docker prune
+         docker image prune -f
+
+         echo "Running and rebuilding project..."
+         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose up -d
 
 
