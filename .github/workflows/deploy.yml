@@ -1,12 +1,10 @@
 name : Deployment Pipeline
 
 on:
- workflow_run:
-  workflows: ["publish-images"]
-  types:
-    - completed
+ push:
   branches: [main]
- workflow_dispatch:
+ pull_request:
+  branches: [main]
 
 jobs:
  deploy:
