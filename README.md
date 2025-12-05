@@ -4,6 +4,13 @@ Centroid Finder is a full-stack application built to process video and image fil
 
 ---
 
+- [Setting up Docker](#installing-and-running-docker)
+- [Running Application on Docker](#running-the-project)
+- [Troubleshooting](#troubleshooting)
+- [CI/CD pipeline](#cicd-pipeline)
+
+---
+
 ## 🧩 Project Structure
 
 | Layer        | Description |
@@ -43,9 +50,7 @@ Centroid Finder is a full-stack application built to process video and image fil
 
 ---
 
-# 🛠️ Installing and Running Docker
-
-## Prerequisites
+## Installing and Running Docker
 
 ### Step 1: Install Docker
 
@@ -84,7 +89,7 @@ You should see something like "Docker version 24.x.x". If you get an error, Dock
 
 ## Running the Project
 
-### Step 3: Create Folders for Your Data
+### Step 1: Create Folders for Your Data
 
 Before running the project, you need to create folders on your computer where the application will store videos and results.
 
@@ -95,36 +100,34 @@ For example:
 - **Windows**: Create `C:\salamander-videos` and `C:\salamander-results`
 - **Mac/Linux**: Create `~/salamander-videos` and `~/salamander-results`
 
-### Step 4: Download and Run the Application
+### Step 2: Download and Run the Application
 
-Open your terminal/command prompt and run these commands one at a time:
-
-#### Download the application:
-```bash
-docker pull ghcr.io/jameson789/salamander:latest
-```
-This downloads the Salamander application from the internet. It might take a few minutes.
-
-#### Run the application:
+Open your terminal/command prompt and run these commands:
 Replace the folder paths below with the actual paths to the folders you created in Step 3.
 
 **For Windows (using PowerShell or Command Prompt):**
 ```bash
-docker run -p 3000:3000 -p 3001:3001 -v "C:\salamander-videos":/videos -v "C:\salamander-results":/results ghcr.io/jameson789/salamander:latest
+docker run -p 3000:3000 -d \
+-v "C:\salamander-videos":/videos \
+-v "C:\salamander-results":/results \
+ghcr.io/jameson789/centroid-finder-backend:latest
+
+docker run -p 3001:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
 
 **For Mac/Linux:**
 ```bash
-docker run -p 3000:3000 -p 3001:3001 -v ~/salamander-videos:/videos -v ~/salamander-results:/results ghcr.io/jameson789/salamander:latest
+docker run -p 3000:3000 -d \
+-v ~/salamander-videos:/videos \
+-v ~/salamander-results:/results \
+ghcr.io/jameson789/centroid-finder-backend:latest
+
+docker run -p 3001:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
 
-### Step 5: Access the Application
+If it's the first time running the application, or if the application has been updated, it may take a minute to download before running. 
 
-Once the application is running (you'll see log messages in your terminal), open your web browser and go to:
-- `http://localhost:3001` - Web App(where the application actually runs)
-- `http://localhost:3000` - Backend API(runs behind the scenes)
-
-## Understanding the Command
+#### Understanding the Command
 
 Let's break down what that long `docker run` command does:
 
@@ -133,21 +136,35 @@ Let's break down what that long `docker run` command does:
 - `-p 3001:3001` - Maps port 3001 on your computer to port 3001 in the container (for additional services)
 - `-v localVideoPath:/videos` - Connects your local videos folder to the container's `/videos` folder
 - `-v localResultsPath:/results` - Connects your local results folder to the container's `/results` folder
-- `ghcr.io/jameson789/salamander:latest` - The name and version of the application to run
+- `ghcr.io/jameson789/centroid-finder-backend:latest` - The name and version of the application to run
 
-## Customizing Ports (Optional)
+
+### Step 3: Access the Application
+
+Once the application is running (you'll see log messages in your terminal), open your web browser and go to:
+- `http://localhost:3001` - Web App(where the application actually runs)
+- `http://localhost:3000` - Backend API(runs behind the scenes)
+
+### Customizing Ports (Optional)
 
 If ports 3000 and 3001 are already being used by other applications on your computer, you can change them. For example:
 
 ```bash
-docker run -p 8080:3000 -p 8081:3001 -v ~/salamander-videos:/videos -v ~/salamander-results:/results ghcr.io/jameson789/salamander:latest
+docker run -p 3030:3000 -d \
+-v ~/salamander-videos:/videos \
+-v ~/salamander-results:/results \
+ghcr.io/jameson789/centroid-finder-backend:latest
+
+docker run -p 3031:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
 
-Then access the application at `http://localhost:8081` instead.
+Then access the application at `http://localhost:3031` instead.
 
 **Important**: Always keep the numbers after the `:` as `3000` and `3001` - only change the numbers before the `:`.
 
-## Stopping the Application
+The best way to check what application are running on what ports is by viewing the docker desktop application. If the ports are in use, it's possible you have another version of the salamander app running already.
+
+### Stopping the Application
 
 To stop the application:
 1. Go back to your terminal where it's running
@@ -163,7 +180,7 @@ Or: Terminate the process in the docker application itself using the red Trash c
 
 ### "Port already in use"
 - Another application is using ports 3000 or 3001
-- Use different ports (see "Customizing Ports" section above)
+- Stop other application or use different ports (see "Customizing Ports" section above)
 
 ### "Cannot connect the Docker daemon"
 - Docker Desktop isn't running
@@ -173,3 +190,17 @@ Or: Terminate the process in the docker application itself using the red Trash c
 - Check that the folders you specified actually exist
 - Make sure you're using the correct path format for your operating system
 - On Windows, use forward slashes `/` or escape backslashes `\\`
+
+## CI/CD Pipeline
+
+A CI/CD pipeline has been created for this repo to aid in clean development.
+
+### CI
+The CI pipeline is found under the workflow: run-test.yml
+This workflow runs all of our tests on the integral logic of the application on push, or pull request, to the main branch or the dev branch.
+If any tests fail, the workflow will block the push or pull request (if it is on the main branch).
+
+### CD
+The CD pipeline has 2 seperate workflows for different deployment environments.
+The Publish Images workflow will build and push a docker image of the most current code to the git hub container repository (ghcr).
+The Deployment Pipeline workflow will take all the steps to copy over the current code, create local docker images from that code, and run the images all from a Virtual Machine, making the application publicly accessible.
