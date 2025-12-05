@@ -2,11 +2,10 @@ name : Deployment Pipeline
 
 on:
  workflow_run:
-  workflows: ["publish-images"]
+  workflows: ["Maven Tests"]
   types:
     - completed
-  branches: [main]
- workflow_dispatch:
+  branches: [ main ]
 
 jobs:
  deploy:
@@ -16,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Deploy to Digital Ocean VM
-      uses: appleboy/ssh-action@1.0.0
+      uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.VM_HOST }}
         username: ${{ secrets.VM_USERNAME }}
@@ -36,4 +35,19 @@ jobs:
          mkdir salamander-videos
          fi
 
-            
+         git clone https://github.com/Jameson789/centroid-finder.git
+
+         cd centroid-finder/frontend
+
+         echo "NEXT_PUBLIC_HOST=${{secrets.VM_HOST}}" > .env
+
+         cd ../
+
+         echo "Cleaning up any old docker images..."
+         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose down
+         docker image prune -f
+
+         echo "Running and rebuilding project..."
+         VIDEOS_PATH=/root/projects/Salamander-Tracker/salamander-videos RESULTS_PATH=/root/projects/Salamander-Tracker/salamander-results HOST=134.199.219.47 docker compose up -d
+
+
