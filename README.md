@@ -103,28 +103,25 @@ For example:
 ### Step 2: Download and Run the Application
 
 Open your terminal/command prompt and run these commands:
-Replace the folder paths below with the actual paths to the folders you created in Step 3.
+Replace the folder paths below with the actual paths to the folders you created in Step 3, and make sure to not have any spaces in the file path.
 
 **For Windows (using PowerShell or Command Prompt):**
+Run the following commands seperately: 
 ```bash
-docker run -p 3000:3000 -d \
--v "C:\salamander-videos":/videos \
--v "C:\salamander-results":/results \
-ghcr.io/jameson789/centroid-finder-backend:latest
+docker run -p 3000:3000 -d -v C:\salamander-videos:/videos -v C:\salamander-results:/results ghcr.io/jameson789/centroid-finder-backend:latest
+```
 
+```bash
 docker run -p 3001:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
 
 **For Mac/Linux:**
 ```bash
-docker run -p 3000:3000 -d \
--v ~/salamander-videos:/videos \
--v ~/salamander-results:/results \
-ghcr.io/jameson789/centroid-finder-backend:latest
-
+docker run -p 3000:3000 -d -v ~/salamander-videos:/videos -v ~/salamander-results:/results ghcr.io/jameson789/centroid-finder-backend:latest
+```
+```bash
 docker run -p 3001:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
-
 If it's the first time running the application, or if the application has been updated, it may take a minute to download before running. 
 
 #### Understanding the Command
@@ -150,11 +147,10 @@ Once the application is running (you'll see log messages in your terminal), open
 If ports 3000 and 3001 are already being used by other applications on your computer, you can change them. For example:
 
 ```bash
-docker run -p 3030:3000 -d \
--v ~/salamander-videos:/videos \
--v ~/salamander-results:/results \
+docker run -p 3030:3000 -d -v ~/salamander-videos:/videos -v ~/salamander-results:/results 
 ghcr.io/jameson789/centroid-finder-backend:latest
-
+```
+```bash
 docker run -p 3031:3001 -d ghcr.io/jameson789/centroid-finder-frontend:latest
 ```
 
@@ -170,7 +166,7 @@ To stop the application:
 1. Go back to your terminal where it's running
 2. Press `Ctrl+C` (Windows/Linux) or `Cmd+C` (Mac) 
 
-Or: Terminate the process in the docker application itself using the red Trash can button. 
+Or: Stop the process using the red square icon in the docker application itself, or terminate the process using the red Trash can button. 
 
 ## Troubleshooting
 
@@ -191,16 +187,5 @@ Or: Terminate the process in the docker application itself using the red Trash c
 - Make sure you're using the correct path format for your operating system
 - On Windows, use forward slashes `/` or escape backslashes `\\`
 
-## CI/CD Pipeline
-
-A CI/CD pipeline has been created for this repo to aid in clean development.
-
-### CI
-The CI pipeline is found under the workflow: run-test.yml
-This workflow runs all of our tests on the integral logic of the application on push, or pull request, to the main branch or the dev branch.
-If any tests fail, the workflow will block the push or pull request (if it is on the main branch).
-
-### CD
-The CD pipeline has 2 seperate workflows for different deployment environments.
-The Publish Images workflow will build and push a docker image of the most current code to the git hub container repository (ghcr).
-The Deployment Pipeline workflow will take all the steps to copy over the current code, create local docker images from that code, and run the images all from a Virtual Machine, making the application publicly accessible.
+### "Output files not downloading properly"
+- Make sure there are no spaces in the video file names
